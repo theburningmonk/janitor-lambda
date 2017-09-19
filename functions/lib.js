@@ -86,8 +86,7 @@ let deleteVersion = co.wrap(function* (funcArn, version) {
     Qualifier: version
   };
 
-  let res = yield lambda.deleteFunction(params).promise();
-  console.log(res);
+  yield lambda.deleteFunction(params).promise();
 });
 
 let cleanFunc = co.wrap(function* (funcArn) {
