@@ -1,10 +1,18 @@
 service: janitor-lambda
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  versions-prod: true
+  versions-default: false
+
 provider:
   name: aws
   runtime: nodejs6.10
   stage: dev
   region: us-east-1
+  # if there's an override for the env, eg. custom.versions-prod
+  # then use it, otherwise use the versions-default setting
+  versionFunctions: ${self:custom.versions-${self:custom.stage}, self:custom.versions-default}
 
   iamRoleStatements:
     - Effect: Allow
