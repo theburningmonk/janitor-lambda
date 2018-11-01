@@ -1,84 +1,83 @@
 'use strict';
 
 const _      = require('lodash');
-const co     = require('co');
 const AWS    = require('aws-sdk');
 const lambda = new AWS.Lambda();
 
 let functions = [];
 
-let listFunctions = co.wrap(function* () {
+let listFunctions = async () => {
   console.log('listing all available functions');
 
-  let loop = co.wrap(function* (marker, acc) {
+  let loop = async (marker, acc) => {
     let params = {
       Marker: marker,
       MaxItems: 10
     };
 
-    let res = yield lambda.listFunctions(params).promise();
+    let res = await lambda.listFunctions(params).promise();
     let functions = res.Functions.map(x => x.FunctionArn);
     let newAcc = acc.concat(functions);
 
     if (res.NextMarker) {
-      return yield loop(res.NextMarker, newAcc);
+      return await loop(res.NextMarker, newAcc);
     } else {
       return _.shuffle(newAcc);
     }
-  });
+  };
 
-  return yield loop(undefined, []);
-});
+  return await loop(undefined, []);
+};
 
-let listVersions = co.wrap(function* (funcArn) {
+let listVersions = async (funcArn) => {
   console.log(`listing versions for function : ${funcArn}`);
 
-  let loop = co.wrap(function* (marker, acc) {
+  let loop = async (marker, acc) => {
     let params = {
       FunctionName: funcArn,
       Marker: marker,
       MaxItems: 20
     };
 
-    let res = yield lambda.listVersionsByFunction(params).promise();
+    let res = await lambda.listVersionsByFunction(params).promise();
     let versions = res.Versions.map(x => x.Version).filter(x => x != "$LATEST");
     let newAcc = acc.concat(versions);
 
     if (res.NextMarker) {
-      return yield loop(res.NextMarker, newAcc);
+      return loop(res.NextMarker, newAcc);
     } else {
       return newAcc;
     }
-  });
+  };
 
-  return yield loop(undefined, []);
-});
+  return loop(undefined, []);
+};
 
-let listAliasedVersions = co.wrap(function* (funcArn) {
+let listAliasedVersions = async (funcArn) => {
   console.log(`listing aliases for function : ${funcArn}`);
 
-  let loop = co.wrap(function* (marker, acc) {
+  let loop = async (marker, acc) => {
     let params = {
       FunctionName: funcArn,
       Marker: marker,
       MaxItems: 20
     };
 
-    let res = yield lambda.listAliases(params).promise();
+    let res = await lambda.listAliases(params).promise();
     let versions = res.Aliases.map(x => x.FunctionVersion);
     let newAcc = acc.concat(versions);
 
     if (res.NextMarker) {
-      return yield loop(res.NextMarker, newAcc);
+      return loop(res.NextMarker, newAcc);
     } else {
       return newAcc;
     }
-  });
+  };
 
-  return yield loop(undefined, []);
-});
+  return loop(undefined, []);
+};
 
-let deleteVersion = co.wrap(function* (funcArn, version) {
+let deleteVersion = async (funcArn, version) => {
   console.log(`deleting [${funcArn}] version [${version}]`);
 
   let params = {
@@ -86,27 +85,27 @@ let deleteVersion = co.wrap(function* (funcArn, version) {
     Qualifier: version
   };
 
-  yield lambda.deleteFunction(params).promise();
-});
+  await lambda.deleteFunction(params).promise();
+};
 
-let cleanFunc = co.wrap(function* (funcArn) {
+let cleanFunc = async (funcArn) => {
   console.log(`cleaning function: ${funcArn}`);
-  let aliasedVersions = yield listAliasedVersions(funcArn);
+  let aliasedVersions = await listAliasedVersions(funcArn);
   console.log('found aliased versions:\n', aliasedVersions);
 
-  let versions = yield listVersions(funcArn);
+  let versions = await listVersions(funcArn);
   console.log('found versions:\n', versions);
 
   for (let version of versions) {
     if (!_.includes(aliasedVersions, version)) {
-      yield deleteVersion(funcArn, version);
+      await deleteVersion(funcArn, version);
     }
   }
-});
+};
 
-let clean = co.wrap(function* () {
+let clean = async () => {
   if (functions.length === 0) {
-    functions = yield listFunctions();
+    functions = await listFunctions();
   }
 
   // clone the functions that are left to do so that as we iterate with it we
@@ -115,9 +114,9 @@ let clean = co.wrap(function* () {
   console.log(`${toClean.length} functions to clean:\n`, toClean);
 
   for (let func of toClean) {
-    yield cleanFunc(func);
+    await cleanFunc(func);
     _.pull(functions, func);
   }
-});
+};
 
 module.exports.clean = clean;

@@ -1,12 +1,11 @@
 'use strict';
 
-const co    = require('co');
 const clean = require('./lib').clean;
 
-module.exports.handler = co.wrap(function* (event, context, callback) {
+module.exports.handler = async (event, context, callback) => {
   console.log(JSON.stringify(event));
 
-  yield clean();
+  await clean();
 
   callback(null, "ok");
-});
+};

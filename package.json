@@ -9,11 +9,10 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "aws-sdk": "^2.117.0",
-        "serverless": "^1.22.0"
+        "aws-sdk": "^2.346.0",
+        "serverless": "^1.32.0"
     },
     "dependencies": {
-        "co": "^4.6.0",
-        "lodash": "^4.17.4"
+        "lodash": "^4.17.11"
     }
 }
