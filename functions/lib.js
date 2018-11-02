@@ -1,6 +1,5 @@
 'use strict';
 
-const _      = require('lodash');
 const AWS    = require('aws-sdk');
 const lambda = new AWS.Lambda();
 
@@ -115,7 +114,7 @@ let clean = async () => {
 
   for (let func of toClean) {
     await cleanFunc(func);
-    _.pull(functions, func);
+    functions = functions.filter((item) => item !== func);
   }
 };
 
