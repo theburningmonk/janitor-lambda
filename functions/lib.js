@@ -97,7 +97,7 @@ let cleanFunc = async (funcArn) => {
   console.log('found versions:\n', versions);
 
   for (let version of versions) {
-    if (!_.includes(aliasedVersions, version)) {
+    if (!aliasedVersions.includes(version)) {
       await deleteVersion(funcArn, version);
     }
   }
