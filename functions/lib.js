@@ -22,7 +22,7 @@ let listFunctions = async () => {
     if (res.NextMarker) {
       return await loop(res.NextMarker, newAcc);
     } else {
-      return _.shuffle(newAcc);
+      return newAcc.sort(() => Math.random() - Math.random()); // Shuffle newAcc array
     }
   };
 
