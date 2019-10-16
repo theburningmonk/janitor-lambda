@@ -1,4 +1,3 @@
-# janitor-lambda
-Cron job + Lambda function to clean up old, unreferenced versions of Lambda functions from your AWS environment.
+# janitor-lambda [deprecated]
 
-To deploy, run `./deploy.sh <stage>` where `stage` is the name of the stage you want to deploy the function to, eg. `./deploy.sh dev`
+This repo has been superceeded by a SAR app which provides even more features including additional safeguards and the fact that you can deploy it easily using SAM/Serverless/CloudFormation, and it's semantic versioned.
